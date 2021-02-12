@@ -4,8 +4,15 @@ const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
+
   physics: {
     default: "arcade",
+    arcade: {
+      // gravity: {
+      //   y: 200,
+      // },
+      debug: true,
+    },
   },
   scene: {
     preload: preload,
@@ -13,38 +20,39 @@ const config = {
     update: update,
   },
 };
+
+let bird = null;
+let totalDelta = null;
+const VELOCITY = 200;
+
 function preload() {
   this.load.image("sky", "./assets/sky.png");
   this.load.image("bird", "/assets/bird.png");
-  // this.load.spritesheet("bird", "./assets/birdSprite.png", {
-  //   frameWidth: 30,
-  //   frameHeight: 30,
-  // });
 }
 
-let bird = null;
 function create() {
-  // this.add.image(config.width / 2, config.height / 2, "sky");
   this.add.image(0, 0, "sky").setOrigin(0);
-  // this.add.image(400, 300, "sky").setOrigin(0, 0);
 
   bird = this.physics.add
     .sprite(config.width * 0.1, config.height / 2, "bird")
     .setOrigin(0);
 
-  // console.log(bird.body);
-  // bird.body.velocity.y = 200;
+  bird.body.velocity.x = VELOCITY;
+  console.log(bird.body);
 }
 
 function update(time, delta) {
-  // for (let i = 0; i > -1; i += 1) {
-  //   console.log(`hello ${i}`);
-  //   // if(key)
-  //   setTimeout(function () {
-  //     i = -1;
-  //   }, 1000);
+  if (bird.body.x >= config.width - bird.width) {
+    bird.body.velocity.x = -VELOCITY;
+  } else if (bird.body.x <= 0) {
+    bird.body.velocity.x = VELOCITY;
+  }
+  // totalDelta += delta;
+  // if (totalDelta < 1000) {
+  //   return;
   // }
   // console.log(bird.body.velocity.y);
+  // totalDelta = 0;
 }
 
 new Phaser.Game(config);
