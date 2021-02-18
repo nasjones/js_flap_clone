@@ -22,11 +22,11 @@ const config = {
 };
 
 let bird = null;
-let totalDelta = null;
-let pipeTop = null;
-let pipeBottom = null;
-const PIPE_VERT_DIST = [120, 270];
-const PIPE_HORI_DIST = [220, 400];
+let pipeX = 400;
+let pipes = null;
+
+const PIPE_VERT_DIST = [120, 250];
+const PIPE_HORI_DIST = [300, 400];
 const FLAPVELOCITY = 250;
 const BIRDORIGIN = { x: config.width * 0.1, y: config.height / 2 };
 const PIPES_TO_RENDER = 4;
@@ -45,37 +45,30 @@ function create() {
 		.setOrigin(0);
 
 	bird.body.gravity.y = 400;
-	// bird.body.velocity.x = 100;
 	bird.body.collideWorldBounds = true;
+
 	this.input.on("pointerdown", flap);
 	this.input.keyboard.on("keydown_SPACE", flap);
 
-	for (
-		let i = 0, pipex = 400;
-		i < PIPES_TO_RENDER;
-		i++, pipex += Phaser.Math.Between(...PIPE_HORI_DIST)
-	) {
-		let pipeSpace = Phaser.Math.Between(...PIPE_VERT_DIST);
-		let pipeStart = Phaser.Math.Between(20, config.height - pipeSpace);
-		pipeTop = this.physics.add
-			.sprite(pipex, pipeStart, "pipe")
-			.setOrigin(0, 1);
-		pipeBottom = this.physics.add
-			.sprite(pipex, pipeTop.y + pipeSpace, "pipe")
-			.setOrigin(0);
-		pipeTop.body.velocity.x = -200;
-		pipeBottom.body.velocity.x = -200;
-		this.physics.add.collider(bird, pipeTop, restartBird);
-		this.physics.add.collider(bird, pipeBottom, restartBird);
+	pipes = this.physics.add.group();
+
+	for (let i = 0; i < PIPES_TO_RENDER; i++) {
+		const hiPipe = pipes.create(0, 0, "pipe").setOrigin(0, 1);
+		const lowPipe = pipes.create(0, 0, "pipe").setOrigin(0, 0);
+
+		this.physics.add.collider(bird, hiPipe, restartBird);
+		this.physics.add.collider(bird, lowPipe, restartBird);
+
+		spawnPipe(hiPipe, lowPipe);
 	}
+	// console.log(pipes);
+	pipes.setVelocityX(-200);
 }
 
 function update() {
 	if (bird.body.blocked.none == false) {
 		restartBird();
 	}
-	// game.physics.arcade.collide(bird, pipeTop);
-	// game.physics.arcade.collide(bird, pipeBottom);
 }
 
 function restartBird() {
@@ -88,7 +81,23 @@ function flap() {
 	bird.body.velocity.y -= FLAPVELOCITY;
 }
 
-function spawnPipe() {}
+function spawnPipe(hiPipe, lowPipe) {
+	let pipeSpace = Phaser.Math.Between(...PIPE_VERT_DIST);
+	let pipeY = Phaser.Math.Between(25, config.height - pipeSpace);
+
+	hiPipe.x = pipeX;
+	hiPipe.y = pipeY;
+
+	lowPipe.x = pipeX;
+	lowPipe.y = hiPipe.y + pipeSpace;
+
+	pipeX += Phaser.Math.Between(...PIPE_HORI_DIST);
+	// this.physics.add.collider(bird, pipeTop, restartBird);
+	// this.physics.add.collider(bird, pipeBottom, restartBird);
+}
+
+function getRightMostPipe() {}
+
 new Phaser.Game(config);
 
 // ('./assets/sky.png')
